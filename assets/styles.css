@@ -6,3 +6,5 @@
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important;animation:none!important}}
 
 .footer-counter{display:flex;align-items:center;justify-content:space-between;gap:20px;padding-block:18px;border-top:1px solid #506253;color:#c2ccbf;font-size:11px}.liveinternet-counter{width:88px;min-height:31px;flex-shrink:0}.liveinternet-counter img{display:block;width:88px;height:31px}
+
+.footer-counter{flex-wrap:wrap}.footer-counters{display:flex;align-items:center;gap:16px;flex-wrap:wrap}.sber-counter{min-height:31px;display:flex;align-items:center}.sber-counter img{max-width:120px;height:auto}

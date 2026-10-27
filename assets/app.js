@@ -1,13 +1,38 @@
 'use strict';
 (() => {
-  // The queue is only a local verification aid; it is not a connected analytics service.
+  // Keep a bounded local log and send real interactions when the Sber SDK is ready.
   const eventLog = [];
+  const pendingSberEvents = [];
+  const sendSberEvent = event => {
+    if (typeof window.top100Counter?.trackEvent !== 'function') return false;
+    try {
+      window.top100Counter.trackEvent(event.name, event.properties);
+      return true;
+    } catch {
+      // A blocked or failing counter must not prevent use of the guide.
+      return false;
+    }
+  };
+  const sberReady = () => {
+    if (typeof window.top100Counter?.trackEvent !== 'function') return;
+    for (const event of pendingSberEvents.splice(0)) sendSberEvent(event);
+    const widget = document.getElementById('top100_widget');
+    if (widget && !widget.hasChildNodes() && typeof window.top100Counter.drawLogoTo === 'function') {
+      try { window.top100Counter.drawLogoTo('top100_widget'); } catch { /* Optional badge. */ }
+    }
+  };
+  window.addEventListener('green-corner:sber-ready', sberReady);
+  sberReady();
   window.greenCornerEvents = eventLog;
   window.greenCornerTrack = (name, properties = {}) => {
     const event = { name, properties, timestamp: new Date().toISOString(), page: location.pathname };
     eventLog.push(event);
     if (eventLog.length > 100) eventLog.shift();
     window.dispatchEvent(new CustomEvent('green-corner:event', { detail: event }));
+    if (!sendSberEvent(event)) {
+      pendingSberEvents.push(event);
+      if (pendingSberEvents.length > 100) pendingSberEvents.shift();
+    }
   };
 
   const menu = document.querySelector('.menu-toggle');
