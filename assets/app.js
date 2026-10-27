@@ -1,6 +1,6 @@
 'use strict';
 (() => {
-  // Keep a bounded local log and send real interactions when the Sber SDK is ready.
+  // Keep a bounded local log and send real interactions to the connected counters.
   const eventLog = [];
   const pendingSberEvents = [];
   const sendSberEvent = event => {
@@ -32,6 +32,13 @@
     if (!sendSberEvent(event)) {
       pendingSberEvents.push(event);
       if (pendingSberEvents.length > 100) pendingSberEvents.shift();
+    }
+    const myTrackerGoals = { plant_match_complete: 'PlantMatchComplete', guide_download: 'GuideDownload' };
+    if (myTrackerGoals[name]) {
+      try {
+        // The official queue accepts goals before the asynchronous SDK is ready.
+        (window._tmr = window._tmr || []).push({ id: '3809415', type: 'reachGoal', goal: myTrackerGoals[name] });
+      } catch { /* Analytics must not interrupt the visitor's action. */ }
     }
   };
 
